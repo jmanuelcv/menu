@@ -7,6 +7,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+
 class restaurante_controller extends Controller
 {
     /* Funcion que elimina un registro */
@@ -106,65 +107,34 @@ class restaurante_controller extends Controller
         } else { $newListItem->ruta = "";}
         $newListItem->save();
 
-        return json([
+        return response()->json([
             "status" => "OK",
-            "name" =>  $newListItem->nombre,
+            "name" => "Se ha creado el plato" . $newListItem->nombre,
         ]);
 
     }
-
 
     public function update_api(Request $request)
     {
 
-        $nombre = $request->nombre;
-        $categoria = $request->categoria;
-        $precio = $request->precio;
-        $archivo = $request->file('imagen');
-        /* Se comprueba que se ha seleccionado una imagen,
-        si es asi, se renombra y se almacena ,en caso contraro,
-        la ruta de la db  quedara vacia */
-        if ($request->imagen != null) {
-            $nombre_a = $request->nombre . "-" . $archivo->getClientOriginalName();
-            $ru = "menu/img/ ";
-            $archivo = "/storage/" . trim($ru, " ") . $nombre_a;
-            Storage::disk('public')->putFileAs(trim($ru, " "), $request->file('imagen'), $nombre_a);
-            $ruta = $archivo;
-            DB::update('update restaurante set nombre = ? , categoria = ? , precio = ?,ruta=? where id = ?', ["$nombre", "$categoria", "$precio", "$ruta", $id]);
-        } else {DB::update('update restaurante set nombre = ? , categoria = ? , precio = ? where id = ?', ["$nombre", "$categoria", "$precio", $id]);}
-        $lista = DB::table('restaurante')->get();
-        return view('menu', ['restaurante' => $lista]);
+        DB::table('restaurante')
+        ->where('id', $request->id)
+        ->update( $request->all());   
 
-        return json([
+        return response()->json([
             "status" => "OK",
-            "plato" =>  $newListItem->nombre,
+            "plato" => "Se ha editado el plato",
         ]);
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
 
     public function destroy(Request $request)
     {
-
         $id = $request->id;
-
         $item = restaurante::find($id);
         $item->delete();
-        return json([
+        return response()->json([
             "status" => "OK",
             "description" => "Elemento eliminado",
-
         ]);
 
     }
